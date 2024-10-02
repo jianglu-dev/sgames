@@ -73,6 +73,64 @@
                 flex-wrap: wrap;
             }
         }
+        #keyboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .key {
+            font-size: 20px;
+            padding: 15px;
+            text-align: center;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .key:hover {
+            background-color: #f0f0f0;
+        }
+        @media (max-width: 600px) {
+            #keyboard {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        #clear-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 18px;
+            background-color: #ff9999;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #clear-btn:hover {
+            background-color: #ff6666;
+        }
+        #clear-btn, #submit-btn, #new-game-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #clear-btn {
+            background-color: #f44336;
+        }
+        #new-game-btn {
+            background-color: #2196F3;
+        }
     </style>
 </head>
 <body>
@@ -88,81 +146,109 @@
         <p>规则：使用给定的四个数字，通过加减乘除运算得到24。每个数字必须使用一次且只能使用一次。</p>
         <div id="numbers-display"></div>
         <div id="input-container">
-            <input type="text" id="expression-input" placeholder="输入你的算式">
-            <button id="submit-btn">提交</button>
+            <input type="text" id="expression-input" placeholder="输入你的算式" readonly>
         </div>
+        <div id="keyboard">
+            <button class="key">7</button>
+            <button class="key">8</button>
+            <button class="key">9</button>
+            <button class="key">+</button>
+            <button class="key">4</button>
+            <button class="key">5</button>
+            <button class="key">6</button>
+            <button class="key">-</button>
+            <button class="key">1</button>
+            <button class="key">2</button>
+            <button class="key">3</button>
+            <button class="key">*</button>
+            <button class="key">0</button>
+            <button class="key">(</button>
+            <button class="key">)</button>
+            <button class="key">/</button>
+        </div>
+        <button id="clear-btn">清除</button>
+        <button id="submit-btn">提交</button>
         <div id="message"></div>
         <button id="new-game-btn">新游戏</button>
     </div>
     <script>
-        const numbersDisplay = document.getElementById('numbers-display');
-        const expressionInput = document.getElementById('expression-input');
-        const submitBtn = document.getElementById('submit-btn');
-        const newGameBtn = document.getElementById('new-game-btn');
-        const messageElement = document.getElementById('message');
+        document.addEventListener('DOMContentLoaded', function() {
+            const numbersDisplay = document.getElementById('numbers-display');
+            const expressionInput = document.getElementById('expression-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const newGameBtn = document.getElementById('new-game-btn');
+            const messageElement = document.getElementById('message');
+            const clearBtn = document.getElementById('clear-btn');
+            const keys = document.querySelectorAll('.key');
 
-        let currentNumbers = [];
+            let currentNumbers = [];
 
-        function generateRandomNumbers() {
-            currentNumbers = [];
-            for (let i = 0; i < 4; i++) {
-                currentNumbers.push(Math.floor(Math.random() * 9) + 1);
-            }
-            numbersDisplay.textContent = "数字：" + currentNumbers.join(', ');
-        }
-
-        function evaluateExpression(expression) {
-            try {
-                return Function(`return ${expression}`)();
-            } catch (error) {
-                return null;
-            }
-        }
-
-        function checkExpression() {
-            const expression = expressionInput.value.trim();
-            const result = evaluateExpression(expression);
-
-            if (result === null) {
-                messageElement.textContent = "无效的表达式，请重试。";
-                return;
+            function generateRandomNumbers() {
+                currentNumbers = Array.from({length: 4}, () => Math.floor(Math.random() * 9) + 1);
+                numbersDisplay.textContent = "数字：" + currentNumbers.join(', ');
             }
 
-            if (result !== 24) {
-                messageElement.textContent = "结果不等于24，请重试。";
-                return;
+            function evaluateExpression(expression) {
+                try {
+                    return Function(`return ${expression}`)();
+                } catch (error) {
+                    return null;
+                }
             }
 
-            const usedNumbers = expression.match(/\d+/g).map(Number);
-            const sortedCurrentNumbers = [...currentNumbers].sort();
-            const sortedUsedNumbers = [...usedNumbers].sort();
+            function checkExpression() {
+                const expression = expressionInput.value.trim();
+                const result = evaluateExpression(expression);
 
-            if (JSON.stringify(sortedCurrentNumbers) !== JSON.stringify(sortedUsedNumbers)) {
-                messageElement.textContent = "请只使用给定的数字，每个数字使用一次。";
-                return;
+                if (result === null) {
+                    messageElement.textContent = "无效的表达式，请重试。";
+                    return;
+                }
+
+                if (result !== 24) {
+                    messageElement.textContent = "结果不等于24，请重试。";
+                    return;
+                }
+
+                const usedNumbers = expression.match(/\d+/g).map(Number);
+                const sortedCurrentNumbers = [...currentNumbers].sort((a, b) => a - b);
+                const sortedUsedNumbers = [...usedNumbers].sort((a, b) => a - b);
+
+                if (JSON.stringify(sortedCurrentNumbers) !== JSON.stringify(sortedUsedNumbers)) {
+                    messageElement.textContent = "请只使用给定的数字，每个数字使用一次。";
+                    return;
+                }
+
+                messageElement.textContent = "恭喜！你解出了24点。";
+                messageElement.style.color = "green";
             }
 
-            messageElement.textContent = "恭喜！你解出了24点。";
-            messageElement.style.color = "green";
-        }
-
-        function startNewGame() {
-            generateRandomNumbers();
-            expressionInput.value = '';
-            messageElement.textContent = '';
-            messageElement.style.color = "red";
-        }
-
-        submitBtn.addEventListener('click', checkExpression);
-        newGameBtn.addEventListener('click', startNewGame);
-        expressionInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkExpression();
+            function startNewGame() {
+                generateRandomNumbers();
+                expressionInput.value = '';
+                messageElement.textContent = '';
+                messageElement.style.color = "red";
             }
+
+            function appendToInput(value) {
+                expressionInput.value += value;
+            }
+
+            function clearInput() {
+                expressionInput.value = '';
+            }
+
+            submitBtn.addEventListener('click', checkExpression);
+            newGameBtn.addEventListener('click', startNewGame);
+            clearBtn.addEventListener('click', clearInput);
+
+            keys.forEach(key => {
+                key.addEventListener('click', () => appendToInput(key.textContent));
+            });
+
+            // 初始化游戏
+            startNewGame();
         });
-
-        // 初始化游戏
-        startNewGame();
     </script>
 </body>
 </html>

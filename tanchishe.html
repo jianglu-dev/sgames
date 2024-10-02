@@ -42,6 +42,45 @@
         .nav-btn:hover {
             background-color: #e0e0e0;
         }
+        #game-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+            width: 150px;
+        }
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #up-btn { grid-column: 2; }
+        #left-btn { grid-column: 1; grid-row: 2; }
+        #right-btn { grid-column: 3; grid-row: 2; }
+        #down-btn { grid-column: 2; grid-row: 3; }
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+        #score {
+            font-size: 24px;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -54,25 +93,47 @@
     </div>
     <div id="game-container">
         <h1>贪吃蛇游戏</h1>
-        <div id="game-board"></div>
+        <div id="score">得分: 0</div>
+        <div id="game-board">
+            <div id="game-over">
+                <h2>游戏结束</h2>
+                <p id="final-score"></p>
+                <button id="restart-btn">重新开始</button>
+            </div>
+        </div>
         <div id="speed-control">
             <label for="speed">速度：</label>
             <input type="range" id="speed" min="1" max="10" value="5">
             <span id="speed-value">5</span>
         </div>
         <button id="start-btn">开始游戏</button>
+        <div id="game-controls">
+            <button id="up-btn" class="control-btn">↑</button>
+            <button id="left-btn" class="control-btn">←</button>
+            <button id="right-btn" class="control-btn">→</button>
+            <button id="down-btn" class="control-btn">↓</button>
+        </div>
     </div>
     <script>
         const board = document.getElementById('game-board');
         const speedControl = document.getElementById('speed');
         const speedValue = document.getElementById('speed-value');
         const startBtn = document.getElementById('start-btn');
-
+        const gameOverScreen = document.getElementById('game-over');
+        const restartBtn = document.getElementById('restart-btn');
+        const scoreElement = document.getElementById('score');
+        const finalScoreElement = document.getElementById('final-score');
         let snake = [{x: 150, y: 150}];
         let food = {};
         let direction = 'right';
         let gameLoop;
         let speed = 100;
+        let score = 0;
+
+        const upBtn = document.getElementById('up-btn');
+        const leftBtn = document.getElementById('left-btn');
+        const rightBtn = document.getElementById('right-btn');
+        const downBtn = document.getElementById('down-btn');
 
         function createFood() {
             food = {
@@ -115,14 +176,15 @@
             }
 
             if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                scoreElement.textContent = `得分: ${score}`;
                 createFood();
             } else {
                 snake.pop();
             }
 
             if (head.x < 0 || head.x > 280 || head.y < 0 || head.y > 280 || snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-                clearInterval(gameLoop);
-                alert('游戏结束！');
+                endGame();
                 return;
             }
 
@@ -130,12 +192,30 @@
             drawGame();
         }
 
+        function endGame() {
+            clearInterval(gameLoop);
+            gameOverScreen.style.display = 'block';
+            finalScoreElement.textContent = `最终得分: ${score}`;
+        }
+
         function startGame() {
             snake = [{x: 150, y: 150}];
             createFood();
             direction = 'right';
+            score = 0;
+            scoreElement.textContent = `得分: ${score}`;
             clearInterval(gameLoop);
             gameLoop = setInterval(moveSnake, speed);
+            gameOverScreen.style.display = 'none';
+        }
+
+        function changeDirection(newDirection) {
+            switch(newDirection) {
+                case 'up': if (direction !== 'down') direction = 'up'; break;
+                case 'down': if (direction !== 'up') direction = 'down'; break;
+                case 'left': if (direction !== 'right') direction = 'left'; break;
+                case 'right': if (direction !== 'left') direction = 'right'; break;
+            }
         }
 
         document.addEventListener('keydown', (e) => {
@@ -157,6 +237,23 @@
         });
 
         startBtn.addEventListener('click', startGame);
+
+        upBtn.addEventListener('click', () => changeDirection('up'));
+        leftBtn.addEventListener('click', () => changeDirection('left'));
+        rightBtn.addEventListener('click', () => changeDirection('right'));
+        downBtn.addEventListener('click', () => changeDirection('down'));
+
+        // 为触摸设备添加触摸事件
+        upBtn.addEventListener('touchstart', (e) => { e.preventDefault(); changeDirection('up'); });
+        leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); changeDirection('left'); });
+        rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); changeDirection('right'); });
+        downBtn.addEventListener('touchstart', (e) => { e.preventDefault(); changeDirection('down'); });
+
+        restartBtn.addEventListener('click', startGame);
+
+        // 初始化游戏
+        createFood();
+        drawGame();
     </script>
 </body>
 </html>
