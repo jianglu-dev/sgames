@@ -210,11 +210,15 @@
         }
 
         function changeDirection(newDirection) {
-            switch(newDirection) {
-                case 'up': if (direction !== 'down') direction = 'up'; break;
-                case 'down': if (direction !== 'up') direction = 'down'; break;
-                case 'left': if (direction !== 'right') direction = 'left'; break;
-                case 'right': if (direction !== 'left') direction = 'right'; break;
+            const oppositeDirections = {
+                'up': 'down',
+                'down': 'up',
+                'left': 'right',
+                'right': 'left'
+            };
+
+            if (direction !== oppositeDirections[newDirection]) {
+                direction = newDirection;
             }
         }
 

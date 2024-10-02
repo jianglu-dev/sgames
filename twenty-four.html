@@ -165,6 +165,7 @@
             <button class="key">(</button>
             <button class="key">)</button>
             <button class="key">/</button>
+            <button id="delete-btn" class="key">⌫</button>
         </div>
         <button id="clear-btn">清除</button>
         <button id="submit-btn">提交</button>
@@ -180,6 +181,7 @@
             const messageElement = document.getElementById('message');
             const clearBtn = document.getElementById('clear-btn');
             const keys = document.querySelectorAll('.key');
+            const deleteBtn = document.getElementById('delete-btn');
 
             let currentNumbers = [];
 
@@ -238,9 +240,14 @@
                 expressionInput.value = '';
             }
 
+            function deleteLastChar() {
+                expressionInput.value = expressionInput.value.slice(0, -1);
+            }
+
             submitBtn.addEventListener('click', checkExpression);
             newGameBtn.addEventListener('click', startNewGame);
             clearBtn.addEventListener('click', clearInput);
+            deleteBtn.addEventListener('click', deleteLastChar);
 
             keys.forEach(key => {
                 key.addEventListener('click', () => appendToInput(key.textContent));
