@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成语接龙游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+        }
+        #chengyu-chain {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #input-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        #new-chengyu {
+            flex-grow: 1;
+            font-size: 18px;
+            padding: 5px;
+        }
+        #submit-btn {
+            font-size: 18px;
+            padding: 5px 10px;
+            margin-left: 10px;
+        }
+        #message {
+            color: red;
+        }
+        #restart-btn {
+            font-size: 18px;
+            padding: 5px 10px;
+            margin-top: 10px;
+        }
+        #nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-btn {
+            font-size: 16px;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .nav-btn:hover {
+            background-color: #e0e0e0;
+        }
+        #button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-container">
+        <button class="nav-btn" onclick="location.href='index.html'">首页</button>
+        <button class="nav-btn" onclick="location.href='addword.html'">加字游戏</button>
+        <button class="nav-btn" onclick="location.href='chengyujielong.html'">成语接龙</button>
+        <button class="nav-btn" onclick="location.href='twenty-four.html'">24点游戏</button>
+    </div>
+    <div id="game-container">
+        <h1>成语接龙游戏</h1>
+        <p>规则：输入一个成语，要求新成语的第一个字必须与前一个成语的最后一个字相同。</p>
+        <div id="chengyu-chain"></div>
+        <div id="input-container">
+            <input type="text" id="new-chengyu" placeholder="输入下一个成语">
+            <button id="submit-btn">提交</button>
+        </div>
+        <div id="message"></div>
+        <button id="restart-btn">重新开始</button>
+    </div>
+    <div id="button-container">
+        <button id="submit-btn">提交</button>
+        <button id="restart-btn">重新开始</button>
+    </div>
+    <script>
+        const initialChengyu = ["一帆风顺", "画蛇添足", "守株待兔", "滥竽充数", "程门立雪"];
+        let chengyuChain = [];
+        
+        const chengyuChainElement = document.getElementById('chengyu-chain');
+        const newChengyuInput = document.getElementById('new-chengyu');
+        const submitBtn = document.getElementById('submit-btn');
+        const messageElement = document.getElementById('message');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function getRandomChengyu() {
+            return initialChengyu[Math.floor(Math.random() * initialChengyu.length)];
+        }
+
+        function updateChengyuChain() {
+            chengyuChainElement.textContent = chengyuChain.join(' → ');
+        }
+
+        function addChengyu() {
+            const newChengyu = newChengyuInput.value.trim();
+            if (!checkValidity(newChengyu)) {
+                messageElement.textContent = "请输入一个有效的四字成语";
+                return;
+            }
+
+            const lastChengyu = chengyuChain[chengyuChain.length - 1];
+            if (newChengyu[0] !== lastChengyu[lastChengyu.length - 1]) {
+                messageElement.textContent = "新成语的第一个字必须与前一个成语的最后一个字相同";
+                return;
+            }
+
+            if (chengyuChain.includes(newChengyu)) {
+                messageElement.textContent = "该成语已经使用过了";
+                return;
+            }
+
+            chengyuChain.push(newChengyu);
+            updateChengyuChain();
+            newChengyuInput.value = '';
+            messageElement.textContent = '';
+        }
+
+        function restartGame() {
+            chengyuChain = [getRandomChengyu()];
+            updateChengyuChain();
+            newChengyuInput.value = '';
+            messageElement.textContent = '';
+        }
+
+        submitBtn.addEventListener('click', addChengyu);
+        restartBtn.addEventListener('click', restartGame);
+        newChengyuInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addChengyu();
+            }
+        });
+
+        function checkValidity(chengyu) {
+            // 这里可以添加一个成语词典来验证输入是否为有效成语
+            // 现在我们只检查长度为4
+            return chengyu.length === 4;
+        }
+
+        // 初始化游戏
+        restartGame();
+    </script>
+</body>
+</html>

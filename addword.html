@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加字游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+        }
+        #current-sentence {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #input-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        #new-word {
+            flex-grow: 1;
+            font-size: 18px;
+            padding: 5px;
+        }
+        #submit-btn {
+            font-size: 18px;
+            padding: 5px 10px;
+            margin-left: 10px;
+        }
+        #message {
+            color: red;
+        }
+        #word-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .word-input {
+            width: 30px;
+            height: 30px;
+            font-size: 24px;
+            text-align: center;
+            margin: 0 2px;
+        }
+        #submit-btn {
+            display: block;
+            margin: 10px auto;
+        }
+        #button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #check-btn {
+            font-size: 18px;
+            padding: 5px 10px;
+        }
+        #restart-btn {
+            font-size: 18px;
+            padding: 5px 10px;
+        }
+        #nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-btn {
+            font-size: 16px;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .nav-btn:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-container">
+        <button class="nav-btn" onclick="location.href='index.html'">首页</button>
+        <button class="nav-btn" onclick="location.href='addword.html'">加字游戏</button>
+        <button class="nav-btn" onclick="location.href='chengyujielong.html'">成语接龙</button>
+        <button class="nav-btn" onclick="location.href='twenty-four.html'">24点游戏</button>
+    </div>
+    <div id="game-container">
+        <h1>加字游戏</h1>
+        <p>规则：每次在任意位置添加一个字，不能重复，不能是感叹词，但要求语句通顺。</p>
+        <div id="word-container"></div>
+        <div id="button-container">
+            <button id="submit-btn">提交</button>
+            <button id="check-btn">判断通顺</button>
+            <button id="restart-btn">再来一局</button>
+        </div>
+        <div id="message"></div>
+    </div>
+    <script>
+        // 初始词列表
+        const initialWords = ["游戏", "快乐", "学习", "朋友", "生活", "工作", "家庭", "行", "美食", "音乐"];
+        let currentSentence = "";
+
+        const wordContainer = document.getElementById('word-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const checkBtn = document.getElementById('check-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const messageElement = document.getElementById('message');
+
+        // 预定义的通顺句子列表（示例）
+        const fluentSentences = [
+            "好游戏",
+            "玩游戏",
+            "这游戏真好玩",
+            "我喜欢玩游戏",
+            "有趣的游戏",
+            // ... 可以根据新增的初始词添加更多通顺句子
+        ];
+
+        function getRandomInitialWord() {
+            return initialWords[Math.floor(Math.random() * initialWords.length)];
+        }
+
+        function updateWordDisplay() {
+            wordContainer.innerHTML = '';
+            for (let i = 0; i <= currentSentence.length; i++) {
+                if (i > 0) {
+                    const charSpan = document.createElement('span');
+                    charSpan.textContent = currentSentence[i-1];
+                    wordContainer.appendChild(charSpan);
+                }
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'word-input';
+                input.maxLength = 1;
+                wordContainer.appendChild(input);
+            }
+        }
+
+        function addWord() {
+            const inputs = document.querySelectorAll('.word-input');
+            let newWord = '';
+            let insertPosition = -1;
+
+            for (let i = 0; i < inputs.length; i++) {
+                if (inputs[i].value) {
+                    if (newWord) {
+                        messageElement.textContent = "只能在一个位置添加字";
+                        return;
+                    }
+                    newWord = inputs[i].value.trim();
+                    insertPosition = i;
+                }
+            }
+
+            if (!newWord) {
+                messageElement.textContent = "请输入一个字";
+                return;
+            }
+
+            if (currentSentence.includes(newWord)) {
+                messageElement.textContent = "不能重复使用已有的字";
+                return;
+            }
+
+            // 这里可以添加更多的验证，比如检查是否为感叹词
+
+            currentSentence = currentSentence.slice(0, insertPosition) + newWord + currentSentence.slice(insertPosition);
+            updateWordDisplay();
+            messageElement.textContent = '';
+        }
+
+        function checkFluency() {
+            if (fluentSentences.includes(currentSentence)) {
+                messageElement.textContent = "句子通顺！";
+                messageElement.style.color = "green";
+            } else {
+                messageElement.textContent = "句子可能不太通顺，请继续添加或修改。";
+                messageElement.style.color = "orange";
+            }
+        }
+
+        function restartGame() {
+            currentSentence = getRandomInitialWord();
+            updateWordDisplay();
+            messageElement.textContent = '';
+            messageElement.style.color = 'red';  // 重置消息颜色
+        }
+
+        submitBtn.addEventListener('click', addWord);
+        checkBtn.addEventListener('click', checkFluency);
+        restartBtn.addEventListener('click', restartGame);
+
+        // 初始化游戏
+        restartGame();
+    </script>
+</body>
+</html>

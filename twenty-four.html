@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24点游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+        }
+        #numbers-display {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #input-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        #expression-input {
+            flex-grow: 1;
+            font-size: 18px;
+            padding: 5px;
+        }
+        #submit-btn, #new-game-btn {
+            font-size: 18px;
+            padding: 5px 10px;
+            margin-left: 10px;
+        }
+        #message {
+            color: red;
+            margin-bottom: 20px;
+        }
+        #nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-btn {
+            font-size: 16px;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .nav-btn:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-container">
+        <button class="nav-btn" onclick="location.href='index.html'">首页</button>
+        <button class="nav-btn" onclick="location.href='addword.html'">加字游戏</button>
+        <button class="nav-btn" onclick="location.href='chengyujielong.html'">成语接龙</button>
+        <button class="nav-btn" onclick="location.href='twenty-four.html'">24点游戏</button>
+    </div>
+    <div id="game-container">
+        <h1>24点游戏</h1>
+        <p>规则：使用给定的四个数字，通过加减乘除运算得到24。每个数字必须使用一次且只能使用一次。</p>
+        <div id="numbers-display"></div>
+        <div id="input-container">
+            <input type="text" id="expression-input" placeholder="输入你的算式">
+            <button id="submit-btn">提交</button>
+        </div>
+        <div id="message"></div>
+        <button id="new-game-btn">新游戏</button>
+    </div>
+    <script>
+        // 这里添加游戏逻辑
+        // 包括生成随机数字、验证表达式、计算结果等功能
+    </script>
+</body>
+</html>
