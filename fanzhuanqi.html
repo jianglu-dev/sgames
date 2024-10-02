@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黑白翻转棋</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 400px;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            background-color: #228B22;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            background-color: #228B22;
+            border: 1px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .piece {
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+        }
+        .black {
+            background-color: #000;
+        }
+        .white {
+            background-color: #fff;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-btn {
+            font-size: 16px;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .nav-btn:hover {
+            background-color: #e0e0e0;
+        }
+        #ai-control {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-container">
+        <button class="nav-btn" onclick="location.href='index.html'">首页</button>
+        <button class="nav-btn" onclick="location.href='addword.html'">加字游戏</button>
+        <button class="nav-btn" onclick="location.href='chengyujielong.html'">成语接龙</button>
+        <button class="nav-btn" onclick="location.href='twenty-four.html'">24点游戏</button>
+        <button class="nav-btn" onclick="location.href='tanchishe.html'">贪吃蛇</button>
+        <button class="nav-btn" onclick="location.href='fanzhuanqi.html'">黑白翻转棋</button>
+    </div>
+    <div id="game-container">
+        <h1>黑白翻转棋</h1>
+        <div id="board"></div>
+        <div id="status"></div>
+        <div id="ai-control">
+            <label>
+                <input type="checkbox" id="ai-enabled"> 启用AI对手
+            </label>
+        </div>
+        <button id="restart-btn">重新开始</button>
+    </div>
+    <script>
+        const board = document.getElementById('board');
+        const status = document.getElementById('status');
+        const restartBtn = document.getElementById('restart-btn');
+        const aiEnabledCheckbox = document.getElementById('ai-enabled');
+        let currentPlayer = 'black';
+        let gameBoard = [];
+        let aiEnabled = false;
+
+        function initializeBoard() {
+            gameBoard = Array(8).fill().map(() => Array(8).fill(null));
+            gameBoard[3][3] = gameBoard[4][4] = 'white';
+            gameBoard[3][4] = gameBoard[4][3] = 'black';
+            renderBoard();
+            updateStatus();
+        }
+
+        function renderBoard() {
+            board.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    if (gameBoard[i][j]) {
+                        const piece = document.createElement('div');
+                        piece.className = `piece ${gameBoard[i][j]}`;
+                        cell.appendChild(piece);
+                    }
+                    cell.addEventListener('click', () => makeMove(i, j));
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        function makeMove(row, col) {
+            if (gameBoard[row][col] || !isValidMove(row, col)) return;
+
+            gameBoard[row][col] = currentPlayer;
+            flipPieces(row, col);
+            currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+            renderBoard();
+            updateStatus();
+
+            if (aiEnabled && currentPlayer === 'white') {
+                setTimeout(makeAIMove, 500);
+            }
+        }
+
+        function makeAIMove() {
+            const validMoves = [];
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    if (isValidMove(i, j)) {
+                        validMoves.push({row: i, col: j});
+                    }
+                }
+            }
+
+            if (validMoves.length > 0) {
+                const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                makeMove(randomMove.row, randomMove.col);
+            }
+        }
+
+        function isValidMove(row, col) {
+            const directions = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+            for (const [dx, dy] of directions) {
+                if (wouldFlip(row, col, dx, dy)) return true;
+            }
+            return false;
+        }
+
+        function wouldFlip(row, col, dx, dy) {
+            let x = row + dx;
+            let y = col + dy;
+            if (x < 0 || x >= 8 || y < 0 || y >= 8 || gameBoard[x][y] === currentPlayer) return false;
+            if (gameBoard[x][y] === null) return false;
+            while (true) {
+                x += dx;
+                y += dy;
+                if (x < 0 || x >= 8 || y < 0 || y >= 8) return false;
+                if (gameBoard[x][y] === null) return false;
+                if (gameBoard[x][y] === currentPlayer) return true;
+            }
+        }
+
+        function flipPieces(row, col) {
+            const directions = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+            for (const [dx, dy] of directions) {
+                if (wouldFlip(row, col, dx, dy)) {
+                    let x = row + dx;
+                    let y = col + dy;
+                    while (gameBoard[x][y] !== currentPlayer) {
+                        gameBoard[x][y] = currentPlayer;
+                        x += dx;
+                        y += dy;
+                    }
+                }
+            }
+        }
+
+        function updateStatus() {
+            const blackCount = gameBoard.flat().filter(cell => cell === 'black').length;
+            const whiteCount = gameBoard.flat().filter(cell => cell === 'white').length;
+            status.textContent = `黑棋: ${blackCount} | 白棋: ${whiteCount} | 当前回合: ${currentPlayer === 'black' ? '黑棋' : '白棋'}`;
+        }
+
+        restartBtn.addEventListener('click', initializeBoard);
+
+        aiEnabledCheckbox.addEventListener('change', function() {
+            aiEnabled = this.checked;
+            if (aiEnabled && currentPlayer === 'white') {
+                setTimeout(makeAIMove, 500);
+            }
+        });
+
+        initializeBoard();
+    </script>
+</body>
+</html>
