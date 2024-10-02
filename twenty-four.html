@@ -17,8 +17,9 @@
             max-width: 600px;
         }
         #numbers-display {
-            font-size: 24px;
+            font-size: 20px;
             margin-bottom: 20px;
+            word-wrap: break-word;
         }
         #input-container {
             display: flex;
@@ -32,7 +33,8 @@
         #submit-btn, #new-game-btn {
             font-size: 18px;
             padding: 5px 10px;
-            margin-left: 10px;
+            margin-left: 0;
+            margin-bottom: 10px;
         }
         #message {
             color: red;
@@ -55,6 +57,22 @@
         .nav-btn:hover {
             background-color: #e0e0e0;
         }
+        @media (max-width: 600px) {
+            #input-container {
+                flex-direction: column;
+            }
+            #expression-input {
+                margin-bottom: 10px;
+            }
+            #submit-btn, #new-game-btn {
+                width: 100%;
+                margin-left: 0;
+                margin-bottom: 10px;
+            }
+            #nav-container {
+                flex-wrap: wrap;
+            }
+        }
     </style>
 </head>
 <body>
@@ -63,6 +81,7 @@
         <button class="nav-btn" onclick="location.href='addword.html'">加字游戏</button>
         <button class="nav-btn" onclick="location.href='chengyujielong.html'">成语接龙</button>
         <button class="nav-btn" onclick="location.href='twenty-four.html'">24点游戏</button>
+        <button class="nav-btn" onclick="location.href='tanchishe.html'">贪吃蛇</button>
     </div>
     <div id="game-container">
         <h1>24点游戏</h1>
@@ -76,8 +95,74 @@
         <button id="new-game-btn">新游戏</button>
     </div>
     <script>
-        // 这里添加游戏逻辑
-        // 包括生成随机数字、验证表达式、计算结果等功能
+        const numbersDisplay = document.getElementById('numbers-display');
+        const expressionInput = document.getElementById('expression-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const newGameBtn = document.getElementById('new-game-btn');
+        const messageElement = document.getElementById('message');
+
+        let currentNumbers = [];
+
+        function generateRandomNumbers() {
+            currentNumbers = [];
+            for (let i = 0; i < 4; i++) {
+                currentNumbers.push(Math.floor(Math.random() * 9) + 1);
+            }
+            numbersDisplay.textContent = "数字：" + currentNumbers.join(', ');
+        }
+
+        function evaluateExpression(expression) {
+            try {
+                return Function(`return ${expression}`)();
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function checkExpression() {
+            const expression = expressionInput.value.trim();
+            const result = evaluateExpression(expression);
+
+            if (result === null) {
+                messageElement.textContent = "无效的表达式，请重试。";
+                return;
+            }
+
+            if (result !== 24) {
+                messageElement.textContent = "结果不等于24，请重试。";
+                return;
+            }
+
+            const usedNumbers = expression.match(/\d+/g).map(Number);
+            const sortedCurrentNumbers = [...currentNumbers].sort();
+            const sortedUsedNumbers = [...usedNumbers].sort();
+
+            if (JSON.stringify(sortedCurrentNumbers) !== JSON.stringify(sortedUsedNumbers)) {
+                messageElement.textContent = "请只使用给定的数字，每个数字使用一次。";
+                return;
+            }
+
+            messageElement.textContent = "恭喜！你解出了24点。";
+            messageElement.style.color = "green";
+        }
+
+        function startNewGame() {
+            generateRandomNumbers();
+            expressionInput.value = '';
+            messageElement.textContent = '';
+            messageElement.style.color = "red";
+        }
+
+        submitBtn.addEventListener('click', checkExpression);
+        newGameBtn.addEventListener('click', startNewGame);
+        expressionInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkExpression();
+            }
+        });
+
+        // 初始化游戏
+        startNewGame();
     </script>
 </body>
 </html>

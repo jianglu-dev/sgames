@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贪吃蛇游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 400px;
+        }
+        #game-board {
+            width: 300px;
+            height: 300px;
+            border: 2px solid #000;
+            position: relative;
+        }
+        #speed-control {
+            margin-top: 20px;
+        }
+        #nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-btn {
+            font-size: 16px;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .nav-btn:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-container">
+        <button class="nav-btn" onclick="location.href='index.html'">首页</button>
+        <button class="nav-btn" onclick="location.href='addword.html'">加字游戏</button>
+        <button class="nav-btn" onclick="location.href='chengyujielong.html'">成语接龙</button>
+        <button class="nav-btn" onclick="location.href='twenty-four.html'">24点游戏</button>
+        <button class="nav-btn" onclick="location.href='tanchishe.html'">贪吃蛇</button>
+    </div>
+    <div id="game-container">
+        <h1>贪吃蛇游戏</h1>
+        <div id="game-board"></div>
+        <div id="speed-control">
+            <label for="speed">速度：</label>
+            <input type="range" id="speed" min="1" max="10" value="5">
+            <span id="speed-value">5</span>
+        </div>
+        <button id="start-btn">开始游戏</button>
+    </div>
+    <script>
+        const board = document.getElementById('game-board');
+        const speedControl = document.getElementById('speed');
+        const speedValue = document.getElementById('speed-value');
+        const startBtn = document.getElementById('start-btn');
+
+        let snake = [{x: 150, y: 150}];
+        let food = {};
+        let direction = 'right';
+        let gameLoop;
+        let speed = 100;
+
+        function createFood() {
+            food = {
+                x: Math.floor(Math.random() * 15) * 20,
+                y: Math.floor(Math.random() * 15) * 20
+            };
+        }
+
+        function drawGame() {
+            board.innerHTML = '';
+            snake.forEach(segment => {
+                const snakeElement = document.createElement('div');
+                snakeElement.style.position = 'absolute';
+                snakeElement.style.width = '20px';
+                snakeElement.style.height = '20px';
+                snakeElement.style.backgroundColor = 'green';
+                snakeElement.style.left = `${segment.x}px`;
+                snakeElement.style.top = `${segment.y}px`;
+                board.appendChild(snakeElement);
+            });
+
+            const foodElement = document.createElement('div');
+            foodElement.style.position = 'absolute';
+            foodElement.style.width = '20px';
+            foodElement.style.height = '20px';
+            foodElement.style.backgroundColor = 'red';
+            foodElement.style.left = `${food.x}px`;
+            foodElement.style.top = `${food.y}px`;
+            board.appendChild(foodElement);
+        }
+
+        function moveSnake() {
+            const head = {...snake[0]};
+
+            switch(direction) {
+                case 'up': head.y -= 20; break;
+                case 'down': head.y += 20; break;
+                case 'left': head.x -= 20; break;
+                case 'right': head.x += 20; break;
+            }
+
+            if (head.x === food.x && head.y === food.y) {
+                createFood();
+            } else {
+                snake.pop();
+            }
+
+            if (head.x < 0 || head.x > 280 || head.y < 0 || head.y > 280 || snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                clearInterval(gameLoop);
+                alert('游戏结束！');
+                return;
+            }
+
+            snake.unshift(head);
+            drawGame();
+        }
+
+        function startGame() {
+            snake = [{x: 150, y: 150}];
+            createFood();
+            direction = 'right';
+            clearInterval(gameLoop);
+            gameLoop = setInterval(moveSnake, speed);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp': if (direction !== 'down') direction = 'up'; break;
+                case 'ArrowDown': if (direction !== 'up') direction = 'down'; break;
+                case 'ArrowLeft': if (direction !== 'right') direction = 'left'; break;
+                case 'ArrowRight': if (direction !== 'left') direction = 'right'; break;
+            }
+        });
+
+        speedControl.addEventListener('input', () => {
+            speed = 200 - speedControl.value * 15;
+            speedValue.textContent = speedControl.value;
+            if (gameLoop) {
+                clearInterval(gameLoop);
+                gameLoop = setInterval(moveSnake, speed);
+            }
+        });
+
+        startBtn.addEventListener('click', startGame);
+    </script>
+</body>
+</html>
