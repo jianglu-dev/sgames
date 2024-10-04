@@ -169,6 +169,7 @@
         </div>
         <button id="clear-btn">清除</button>
         <button id="submit-btn">提交</button>
+        <button id="show-answer-btn">显示答案</button>
         <div id="message"></div>
         <button id="new-game-btn">新游戏</button>
     </div>
@@ -182,6 +183,7 @@
             const clearBtn = document.getElementById('clear-btn');
             const keys = document.querySelectorAll('.key');
             const deleteBtn = document.getElementById('delete-btn');
+            const showAnswerBtn = document.getElementById('show-answer-btn');
 
             let currentNumbers = [];
 
@@ -244,10 +246,59 @@
                 expressionInput.value = expressionInput.value.slice(0, -1);
             }
 
+            function findAnswer(numbers) {
+                const operators = ['+', '-', '*', '/'];
+                const permutations = getPermutations(numbers);
+
+                for (let perm of permutations) {
+                    for (let op1 of operators) {
+                        for (let op2 of operators) {
+                            for (let op3 of operators) {
+                                const expressions = [
+                                    `(${perm[0]} ${op1} ${perm[1]}) ${op2} ${perm[2]} ${op3} ${perm[3]}`,
+                                    `((${perm[0]} ${op1} ${perm[1]}) ${op2} ${perm[2]}) ${op3} ${perm[3]}`,
+                                    `(${perm[0]} ${op1} ${perm[1]}) ${op2} (${perm[2]} ${op3} ${perm[3]})`,
+                                    `${perm[0]} ${op1} ((${perm[1]} ${op2} ${perm[2]}) ${op3} ${perm[3]})`,
+                                    `${perm[0]} ${op1} (${perm[1]} ${op2} (${perm[2]} ${op3} ${perm[3]}))`
+                                ];
+
+                                for (let expr of expressions) {
+                                    if (evaluateExpression(expr) === 24) {
+                                        return expr;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return "没有找到有效解法";
+            }
+
+            function getPermutations(arr) {
+                if (arr.length <= 1) return [arr];
+                let result = [];
+                for (let i = 0; i < arr.length; i++) {
+                    const current = arr[i];
+                    const remaining = arr.slice(0, i).concat(arr.slice(i + 1));
+                    const perms = getPermutations(remaining);
+                    for (let perm of perms) {
+                        result.push([current].concat(perm));
+                    }
+                }
+                return result;
+            }
+
+            function showAnswer() {
+                const answer = findAnswer(currentNumbers);
+                messageElement.textContent = `一个可能的答案是: ${answer}`;
+                messageElement.style.color = "blue";
+            }
+
             submitBtn.addEventListener('click', checkExpression);
             newGameBtn.addEventListener('click', startNewGame);
             clearBtn.addEventListener('click', clearInput);
             deleteBtn.addEventListener('click', deleteLastChar);
+            showAnswerBtn.addEventListener('click', showAnswer);
 
             keys.forEach(key => {
                 key.addEventListener('click', () => appendToInput(key.textContent));
